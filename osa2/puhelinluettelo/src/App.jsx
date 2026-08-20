@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import personService from './services/persons'
+import Notification from './components/Notification'
 
 const PersonForm = (props) => {
   return (
@@ -15,12 +17,16 @@ const PersonForm = (props) => {
     </form>
   )
 }
-const Persons = ({persons}) => {
+
+const Persons = ({persons, deletePerson}) => {
   return (
     <div>
       {persons.map((person) => (
         <p key={person.name}>
-          {person.name} {person.number}
+          {person.name} {person.number} 
+          <button onClick={() => deletePerson(person.id, person.name)}>
+            delete
+          </button>
         </p>
       ))}
     </div>
@@ -28,14 +34,20 @@ const Persons = ({persons}) => {
 }
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: 'Arto Hellas', number: '040-123456' },
-    { name: 'Ada Lovelace', number: '39-44-5323523' },
-    { name: 'Dan Abramov', number: '12-43-234345' },
-    { name: 'Mary Poppendieck', number: '39-23-6423122' }
-  ]) 
+  const [persons, setPersons] = useState([]) 
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
+  const [errorMessage, setErrorMessage] = useState(null)
+
+  useEffect(() => {
+    console.log('effect')
+    personService
+      .getAll()
+      .then(initialPersons => {
+        setPersons(initialPersons)
+      })
+  }, [])
+  console.log('render', persons.length, 'persons')
 
   const addName = (event) => {
     event.preventDefault()
@@ -54,10 +66,32 @@ const App = () => {
       return
     }
 
-    setPersons(persons.concat(personObject))
-    setNewName('')
-    setNewNumber('')
+    personService
+      .create(personObject)
+      .then(returnedPerson => {
+        setPersons(persons.concat(returnedPerson))
+        setErrorMessage(`Added ${newName}`)
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 4000)
+        setNewName('')
+        setNewNumber('')
+      })
   }
+
+  const deletePerson = (id, name) => {
+  if (window.confirm(`Delete ${name}?`)) {
+    personService
+      .remove(id)
+      .then(() => {
+        setPersons(persons.filter(person => person.id !== id))
+      })
+      setErrorMessage(`Deleted ${name}`)
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 4000)
+  }
+}
 
   const HandleNameChange = (event) => {
     setNewName(event.target.value)
@@ -70,13 +104,14 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={errorMessage} />
       <h2>add a new</h2>
       <PersonForm 
         addName={addName} newName={newName} newNumber={newNumber}
         HandleNameChange={HandleNameChange} HandleNumberChange={HandleNumberChange} 
       />
       <h2>Numbers</h2>
-      <Persons persons={persons} />
+      <Persons persons={persons} deletePerson={deletePerson} />
     </div>
   )
 

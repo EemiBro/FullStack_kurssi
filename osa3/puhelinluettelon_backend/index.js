@@ -1,6 +1,9 @@
 const express = require('express')
 const morgan = require('morgan')
 const app = express()
+require('dotenv').config()
+const Person = require('./models/person')
+const mongoose = require('mongoose')
 
 app.use(express.static('dist'))
 app.use(morgan('tiny'))
@@ -34,14 +37,9 @@ app.get('/api/persons', (request, response) => {
 })
 
 app.get('/api/persons/:id', (request, response) => {
-    const id = request.params.id
-    const person = persons.find(p => p.id === id)
-
-    if (person) {
+    Person.findById(request.params.id).then(person => {
         response.json(person)
-    } else {
-        response.status(404).end()
-    }
+    })
 })
 
 app.get('/api/info', (request, response) => {
@@ -91,8 +89,9 @@ app.post('/api/persons', (request, response) => {
         number: body.number
     }
 
-    persons = persons.concat(person)
-    response.json(person)
+    person.save().then(savedPerson => {
+        response.json(savedPerson)
+    })
 })
 
 const requestLogger = (request, response, next) => {
@@ -103,7 +102,7 @@ const requestLogger = (request, response, next) => {
 
 app.use(requestLogger)
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 }) 

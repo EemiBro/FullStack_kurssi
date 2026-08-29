@@ -2,9 +2,14 @@ const mongoose = require('mongoose');
 
 const url = process.env.MONGODB_URI;
 
+if (!url) {
+    console.error('MONGODB_URI environment variable is not set');
+    process.exit(1);
+}
+
 mongoose.set('strictQuery', false);
 
-console.log('connecting to', url);
+console.log('connecting to MongoDB...');
 
 mongoose.connect(url, { family: 4 })
     .then(() => {

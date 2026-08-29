@@ -88,6 +88,8 @@ app.post('/api/persons', (request, response) => {
         number: body.number
     })
 
+    console.log('saving person:', person)
+
     person.save().then(savedPerson => {
         console.log(`added: ${savedPerson.name}, ${savedPerson.number} to phonebook`)
         response.json(savedPerson)

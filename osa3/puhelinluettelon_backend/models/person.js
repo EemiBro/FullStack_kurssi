@@ -9,7 +9,7 @@ if (!url) {
 
 mongoose.set('strictQuery', false);
 
-console.log('connecting to MongoDB...');
+console.log('connecting to', url);
 
 mongoose.connect(url, { family: 4 })
     .then(() => {

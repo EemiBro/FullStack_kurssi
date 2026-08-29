@@ -83,15 +83,14 @@ app.post('/api/persons', (request, response) => {
         })
     }
 
-    const person = {
-        id: generateId(),
+    const person = new Person({
         name: body.name,
         number: body.number
-    }
+    })
 
-    person.save().then(() => {
-        console.log(`added: ${person.name}, ${person.number} to phonebook`)
-        mongoose.connection.close()
+    person.save().then(savedPerson => {
+        console.log(`added: ${savedPerson.name}, ${savedPerson.number} to phonebook`)
+        response.json(savedPerson)
     })
 })
 

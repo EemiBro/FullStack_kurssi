@@ -8,6 +8,7 @@ const mongoose = require('mongoose')
 app.use(express.static('dist'))
 app.use(morgan('tiny'))
 app.use(express.json())
+app.use(requestLogger)
 
 let persons = [
     {
@@ -38,20 +39,31 @@ app.get('/api/persons', (request, response) => {
     })
 })
 
-app.get('/api/persons/:id', (request, response) => {
-    Person.findById(request.params.id).then(person => {
-        response.json(person)
+app.get('/api/persons/:id', (request, response, next) => {
+    Person.findById(request.params.id)
+    .then(person => {
+        if (person) {
+            response.json(person)
+        } else {
+            response.status(404).end()
+        }
     })
+    .catch(error => next(error))
 })
 
 app.get('/api/info', (request, response) => {
-    response.send('phonebook has info for ' + persons.length + ' people <br>' + new Date())
+    Person.countDocuments().then(count => {
+        response.send(`phonebook has info for ${count} people <br>` + new Date())
+    })
 })
 
-app.delete('/api/persons/:id', (request, response) => {
+app.delete('/api/persons/:id', (request, response, next) => {
     const id = request.params.id
-    persons = persons.filter(p => p.id !== id)
-    response.status(204).end()
+    Person.findByIdAndRemove(request.params.id)
+    .then(() => {
+        response.status(204).end()
+    })
+    .catch(error => next(error))
 })
 
 const generateId = () => {

@@ -5,10 +5,16 @@ require('dotenv').config()
 const Person = require('./models/person')
 const mongoose = require('mongoose')
 
+const requestLogger = (request, response, next) => {
+    console.log('Method:', request.method)
+    console.log('Path:  ', request.path)
+    next()
+}
+
 app.use(express.static('dist'))
 app.use(morgan('tiny'))
-app.use(requestLogger)
 app.use(express.json())
+app.use(requestLogger)
 
 let persons = [
     {
@@ -39,31 +45,25 @@ app.get('/api/persons', (request, response) => {
     })
 })
 
-app.get('/api/persons/:id', (request, response, next) => {
-    Person.findById(request.params.id)
-    .then(person => {
-        if (person) {
-            response.json(person)
-        } else {
-            response.status(404).end()
-        }
+app.get('/api/persons/:id', (request, response) => {
+    Person.findById(request.params.id).then(person => {
+        response.json(person)
     })
     .catch(error => next(error))
 })
 
 app.get('/api/info', (request, response) => {
-    Person.countDocuments().then(count => {
-        response.send(`phonebook has info for ${count} people <br>` + new Date())
+    Person.countDocuments({}).then(count => {
+        response.send(`phonebook has info for ${count} people <br>${new Date()}`)
     })
 })
 
-app.delete('/api/persons/:id', (request, response, next) => {
-    const id = request.params.id
+app.delete('/api/persons/:id', (request, response) => {
     Person.findByIdAndRemove(request.params.id)
-    .then(() => {
-        response.status(204).end()
-    })
-    .catch(error => next(error))
+        .then(result => {
+            response.status(204).end()
+        })
+        .catch(error => next(error))
 })
 
 const generateId = () => {
@@ -109,14 +109,6 @@ app.post('/api/persons', (request, response) => {
         response.json(savedPerson)
     })
 })
-
-const requestLogger = (request, response, next) => {
-    console.log('Method:', request.method)
-    console.log('Path:  ', request.path)
-    next()
-}
-
-app.use(requestLogger)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {

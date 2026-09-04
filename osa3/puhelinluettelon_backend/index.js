@@ -7,6 +7,7 @@ const mongoose = require('mongoose')
 
 app.use(express.static('dist'))
 app.use(morgan('tiny'))
+app.use(requestLogger)
 app.use(express.json())
 
 let persons = [

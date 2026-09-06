@@ -1,43 +1,43 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
-const url = process.env.MONGODB_URI;
+const url = process.env.MONGODB_URI
 
 if (!url) {
-    console.error('MONGODB_URI environment variable is not set');
-    process.exit(1);
+  console.error('MONGODB_URI environment variable is not set')
+  process.exit(1)
 }
 
-mongoose.set('strictQuery', false);
+mongoose.set('strictQuery', false)
 
-console.log('connecting to', url);
+console.log('connecting to', url)
 
 mongoose.connect(url, { family: 4 })
-    .then(() => {
-        console.log('connected to MongoDB')
-    })
-    .catch((error) => {
-        console.error('error connecting to MongoDB:', error)
-    })
+  .then(() => {
+    console.log('connected to MongoDB')
+  })
+  .catch((error) => {
+    console.error('error connecting to MongoDB:', error)
+  })
 
 const personSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        minlength: 3,
-        required: true
-    },
-    number: {
-        type: String,
-        minlength: 8,
-        required: true
-    }
+  name: {
+    type: String,
+    minlength: 3,
+    required: true
+  },
+  number: {
+    type: String,
+    minlength: 8,
+    required: true
+  }
 })
 
 personSchema.set('toJSON', {
-    transform: (document, returnedObject) => {
-        returnedObject.id = returnedObject._id.toString()
-        delete returnedObject._id
-        delete returnedObject.__v
-    }
+  transform: (document, returnedObject) => {
+    returnedObject.id = returnedObject._id.toString()
+    delete returnedObject._id
+    delete returnedObject.__v
+  }
 })
 
 module.exports = mongoose.model('Person', personSchema)

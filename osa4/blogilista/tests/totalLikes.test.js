@@ -3,6 +3,9 @@ const assert = require('node:assert')
 const listHelper = require('../utils/list_helper')
 
 describe('total likes', () => {
+
+  const emptyList = []
+
   const listWithOneBlog = [
     {
       _id: '5a422aa71b54a676234d17f8',
@@ -64,6 +67,10 @@ describe('total likes', () => {
         __v: 0
     }  
   ]
+
+  test('when list is empty likes are 0', () => {
+    assert.strictEqual(emptyList.length, 0)
+  })
 
   test('when list has only one blog equals the likes of that', () => {
     const result = listHelper.totalLikes(listWithOneBlog)

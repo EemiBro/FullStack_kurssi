@@ -7,10 +7,10 @@ const blogsRouter = require('./controllers/blogs')
 
 const app = express()
 
-logger.info('connecting to', config.mongoUrl)
+logger.info('connecting to', config.MONGODB_URI)
 
 mongoose
-    .connect(config.mongoUrl, { family: 4 })
+    .connect(config.MONGODB_URI, { family: 4 })
     .then(() => {
         logger.info('connected to MongoDB')
     })
